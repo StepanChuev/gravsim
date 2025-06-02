@@ -9,6 +9,7 @@
 
 int main(int argc, char const *argv[]){
 	size_t amount = 3;
+	Vec2 shift;
 	View_Port vp;
 	Body *bodies = (Body *)malloc(amount * sizeof(Body));
 	Body_Ren *bodies_ren = (Body_Ren *)malloc(amount * sizeof(Body_Ren));
@@ -19,20 +20,23 @@ int main(int argc, char const *argv[]){
 
 	printf("%d %d\n", vp.width, vp.height);
 
-	bodies[0].x  = (double)vp.width / 2.0;
-	bodies[0].y  = (double)vp.height / 2.0;
+	shift.x = (double)vp.width / 2.0;
+	shift.y = (double)vp.height / 2.0;
+
+	bodies[0].x  = 0.0;
+	bodies[0].y  = 0.0;
 	bodies[0].vx = 0.0;
 	bodies[0].vy = 0.0;
 	bodies[0].m  = 20.0;
 
-	bodies[1].x  = (double)vp.width / 2.0;
-	bodies[1].y  = (double)vp.height / 2.0 - 100.0;
+	bodies[1].x  = 0.0;
+	bodies[1].y  = -100.0;
 	bodies[1].vx = -0.2;
 	bodies[1].vy = 0.0;
 	bodies[1].m  = 1.0;
 
-	bodies[2].x  = (double)vp.width / 2.0;
-	bodies[2].y  = (double)vp.height / 2.0 + 100.0;
+	bodies[2].x  = 0.0;
+	bodies[2].y  = 100.0;
 	bodies[2].vx = 0.2;
 	bodies[2].vy = 0.0;
 	bodies[2].m  = 1.0;
@@ -59,15 +63,21 @@ int main(int argc, char const *argv[]){
 		start = SDL_GetTicks();
 
 		while (SDL_PollEvent(&event)){
-			if (event.type == SDL_QUIT){
-				goto cleanup;
+			switch (event.type){
+				case SDL_QUIT:
+					goto cleanup;
+
+				case SDL_WINDOWEVENT:
+					SDL_GetWindowSize(vp.screen, &vp.width, &vp.height);
+					shift.x = vp.width / 2.0;
+					shift.y = vp.height / 2.0;
 			}
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(vp.ren);
 		SDL_GetRendererOutputSize(vp.ren, &vp.width, &vp.height);
-		render_bodies(&vp, bodies, bodies_ren, amount);
+		render_bodies(&vp, bodies, bodies_ren, shift, amount);
 		SDL_RenderPresent(vp.ren);
 
 		update_coords(bodies, amount, 1);

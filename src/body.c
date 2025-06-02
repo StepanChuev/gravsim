@@ -3,9 +3,10 @@
 #include "body.h"
 
 Vec2 *calc_force(Body *body1, Body *body2, double G){
-	double F = G * body1->m * body2->m / (
-		pow(body2->x - body1->x, 2) + pow(body2->y - body1->y, 2)
-	);
+	double diffx_sqr = pow(body2->x - body1->x, 2);
+	double diffy_sqr = pow(body2->y - body1->y, 2);
+	double r_sqr = diffx_sqr + diffy_sqr;
+	double F = G * body1->m * body2->m / r_sqr;
 
 	Vec2 *F_vec = (Vec2 *)malloc(sizeof(Vec2));
 
@@ -13,12 +14,8 @@ Vec2 *calc_force(Body *body1, Body *body2, double G){
 		return NULL;
 	}
 
-	F_vec->x = F * sqrt(pow(body2->x - body1->x, 2) / (
-		pow(body2->x - body1->x, 2) + pow(body2->y - body1->y, 2)
-	));
-	F_vec->y = F * sqrt(pow(body2->y - body1->y, 2) / (
-		pow(body2->x - body1->x, 2) + pow(body2->y - body1->y, 2)
-	));
+	F_vec->x = F * sqrt(diffx_sqr / r_sqr);
+	F_vec->y = F * sqrt(diffy_sqr / r_sqr);
 
 	return F_vec;
 }
