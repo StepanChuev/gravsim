@@ -13,3 +13,18 @@ void render_bodies(View_Port *vp, Body *bodies, Body_Ren *bodies_ren, Vec2 shift
 		render_body(vp, bodies + i, bodies_ren + i, shift);
 	}
 }
+
+size_t get_index_chosen_body(double x, double y, Body *bodies, Body_Ren *bodies_ren, size_t len){
+	size_t i = 0;
+
+	while (i < len){
+		if (pow(bodies[i].x - x, 2) + pow(bodies[i].y - y, 2) <= 
+			pow(bodies_ren[i].radius, 2)){
+			return i;
+		}
+
+		i++;
+	}
+
+	return len;
+}

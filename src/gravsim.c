@@ -8,7 +8,10 @@
 #define FPS 60
 
 int main(int argc, char const *argv[]){
+	char ispause = 0;
 	size_t amount = 3;
+	size_t fix_i = amount; // amount - no fixation
+	size_t new_fix_i = fix_i;
 	Vec2 shift;
 	View_Port vp;
 	Body *bodies = (Body *)malloc(amount * sizeof(Body));
@@ -17,8 +20,6 @@ int main(int argc, char const *argv[]){
 	if (!bodies || !bodies_ren || !vp_init(&vp, -1, -1, "gravsim")){
 		exit(EXIT_FAILURE);
 	}
-
-	printf("%d %d\n", vp.width, vp.height);
 
 	shift.x = (double)vp.width / 2.0;
 	shift.y = (double)vp.height / 2.0;
@@ -64,14 +65,47 @@ int main(int argc, char const *argv[]){
 
 		while (SDL_PollEvent(&event)){
 			switch (event.type){
-				case SDL_QUIT:
-					goto cleanup;
+			case SDL_QUIT:
+				goto cleanup;
 
-				case SDL_WINDOWEVENT:
-					SDL_GetWindowSize(vp.screen, &vp.width, &vp.height);
-					shift.x = vp.width / 2.0;
-					shift.y = vp.height / 2.0;
+			case SDL_WINDOWEVENT:
+				SDL_GetWindowSize(vp.screen, &vp.width, &vp.height);
+				shift.x = vp.width / 2.0;
+				shift.y = vp.height / 2.0;
+				break;
+
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.sym){
+				case 32:
+					ispause ^= 1;
+					break;
+				}
+
+				break;
+			
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == 1){
+					new_fix_i = get_index_chosen_body((double)event.button.x - shift.x,
+						(double)event.button.y - shift.y, bodies, bodies_ren, amount
+					);
+					fix_i = (new_fix_i == amount) ? fix_i : new_fix_i;
+				}
+
+				if (event.button.button == 3){
+					fix_i = amount;
+					shift.x = (double)vp.width / 2.0;
+					shift.y = (double)vp.height / 2.0;
+				}
 			}
+		}
+
+		if (ispause){
+			continue;
+		}
+
+		if (fix_i != amount){
+			shift.x = (double)vp.width / 2.0 - bodies[fix_i].x;
+			shift.y = (double)vp.height / 2.0 - bodies[fix_i].y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
