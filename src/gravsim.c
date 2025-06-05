@@ -9,6 +9,9 @@
 
 int main(int argc, char const *argv[]){
 	char ispause = 0;
+	float scale = 1;
+	float scale_step = 2;
+	float min_radius = 2;
 	size_t amount = 3;
 	size_t fix_i = amount; // amount - no fixation
 	size_t new_fix_i = fix_i;
@@ -101,6 +104,14 @@ int main(int argc, char const *argv[]){
 					shift.x -= movement_step;
 					movement.x -= movement_step;
 					break;
+
+				case SDLK_UP:
+					scale *= scale_step;
+					break;
+
+				case SDLK_DOWN:
+					scale /= scale_step;
+					break;
 				}
 
 				break;
@@ -108,15 +119,13 @@ int main(int argc, char const *argv[]){
 			case SDL_MOUSEBUTTONDOWN:
 				if (event.button.button == 1){
 					new_fix_i = get_index_chosen_body((double)event.button.x - shift.x,
-						(double)event.button.y - shift.y, bodies, bodies_ren, amount
+						(double)event.button.y - shift.y, bodies, bodies_ren, scale, min_radius, amount
 					);
 
 					if (new_fix_i != amount){
 						fix_i = new_fix_i;
 						movement.x = 0;
 						movement.y = 0;
-						shift.x = (double)vp.width / 2.0 - bodies[fix_i].x;
-						shift.y = (double)vp.height / 2.0 - bodies[fix_i].y;
 					}
 				}
 
@@ -135,14 +144,14 @@ int main(int argc, char const *argv[]){
 		}
 
 		if (fix_i != amount){
-			shift.x = (double)vp.width / 2.0 - bodies[fix_i].x + movement.x;
-			shift.y = (double)vp.height / 2.0 - bodies[fix_i].y + movement.y;
+			shift.x = (double)vp.width / 2.0 - scale * bodies[fix_i].x + movement.x;
+			shift.y = (double)vp.height / 2.0 - scale * bodies[fix_i].y + movement.y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(vp.ren);
 		SDL_GetRendererOutputSize(vp.ren, &vp.width, &vp.height);
-		render_bodies(&vp, bodies, bodies_ren, shift, amount);
+		render_bodies(&vp, bodies, bodies_ren, shift, scale, min_radius, amount);
 		SDL_RenderPresent(vp.ren);
 
 		update_coords(bodies, amount, 1);
