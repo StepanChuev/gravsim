@@ -12,7 +12,9 @@ int main(int argc, char const *argv[]){
 	size_t amount = 3;
 	size_t fix_i = amount; // amount - no fixation
 	size_t new_fix_i = fix_i;
+	double movement_step = 10;
 	Vec2 shift;
+	Vec2 movement;
 	View_Port vp;
 	Body *bodies = (Body *)malloc(amount * sizeof(Body));
 	Body_Ren *bodies_ren = (Body_Ren *)malloc(amount * sizeof(Body_Ren));
@@ -38,7 +40,7 @@ int main(int argc, char const *argv[]){
 
 	bodies[2].x  = 0.0;
 	bodies[2].y  = 100.0;
-	bodies[2].vx = 0.2;
+	bodies[2].vx = 0.3;
 	bodies[2].vy = 0.0;
 	bodies[2].m  = 1.0;
 
@@ -70,14 +72,34 @@ int main(int argc, char const *argv[]){
 
 			case SDL_WINDOWEVENT:
 				SDL_GetWindowSize(vp.screen, &vp.width, &vp.height);
-				shift.x = vp.width / 2.0;
-				shift.y = vp.height / 2.0;
+				shift.x = vp.width / 2.0 + movement.x;
+				shift.y = vp.height / 2.0 + movement.y;
 				break;
 
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym){
 				case 32:
 					ispause ^= 1;
+					break;
+
+				case 'w':
+					shift.y += movement_step;
+					movement.y += movement_step;
+					break;
+
+				case 'a':
+					shift.x += movement_step;
+					movement.x += movement_step;
+					break;
+
+				case 's':
+					shift.y -= movement_step;
+					movement.y -= movement_step;
+					break;
+
+				case 'd':
+					shift.x -= movement_step;
+					movement.x -= movement_step;
 					break;
 				}
 
@@ -88,11 +110,20 @@ int main(int argc, char const *argv[]){
 					new_fix_i = get_index_chosen_body((double)event.button.x - shift.x,
 						(double)event.button.y - shift.y, bodies, bodies_ren, amount
 					);
-					fix_i = (new_fix_i == amount) ? fix_i : new_fix_i;
+
+					if (new_fix_i != amount){
+						fix_i = new_fix_i;
+						movement.x = 0;
+						movement.y = 0;
+						shift.x = (double)vp.width / 2.0 - bodies[fix_i].x;
+						shift.y = (double)vp.height / 2.0 - bodies[fix_i].y;
+					}
 				}
 
 				if (event.button.button == 3){
 					fix_i = amount;
+					movement.x = 0;
+					movement.y = 0;
 					shift.x = (double)vp.width / 2.0;
 					shift.y = (double)vp.height / 2.0;
 				}
@@ -104,8 +135,8 @@ int main(int argc, char const *argv[]){
 		}
 
 		if (fix_i != amount){
-			shift.x = (double)vp.width / 2.0 - bodies[fix_i].x;
-			shift.y = (double)vp.height / 2.0 - bodies[fix_i].y;
+			shift.x = (double)vp.width / 2.0 - bodies[fix_i].x + movement.x;
+			shift.y = (double)vp.height / 2.0 - bodies[fix_i].y + movement.y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
