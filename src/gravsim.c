@@ -15,7 +15,8 @@ int main(int argc, char const *argv[]){
 	size_t amount = 3;
 	size_t fix_i = amount; // amount - no fixation
 	size_t new_fix_i = fix_i;
-	double movement_step = 10;
+	float movement_step = 10;
+	Vec2 click;
 	Vec2 shift;
 	Vec2 movement;
 	View_Port vp;
@@ -26,8 +27,8 @@ int main(int argc, char const *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	shift.x = (double)vp.width / 2.0;
-	shift.y = (double)vp.height / 2.0;
+	shift.x = (float)vp.width / 2.0;
+	shift.y = (float)vp.height / 2.0;
 
 	bodies[0].x  = 0.0;
 	bodies[0].y  = 0.0;
@@ -118,8 +119,11 @@ int main(int argc, char const *argv[]){
 			
 			case SDL_MOUSEBUTTONDOWN:
 				if (event.button.button == 1){
-					new_fix_i = get_index_chosen_body((double)event.button.x - shift.x,
-						(double)event.button.y - shift.y, bodies, bodies_ren, scale, min_radius, amount
+					click.x = (float)event.button.x - shift.x;
+					click.y = (float)event.button.y - shift.y;
+
+					new_fix_i = get_index_chosen_body(bodies, bodies_ren, 
+						click, scale, min_radius, amount
 					);
 
 					if (new_fix_i != amount){
@@ -129,23 +133,19 @@ int main(int argc, char const *argv[]){
 					}
 				}
 
-				if (event.button.button == 3){
+				else if (event.button.button == 3){
 					fix_i = amount;
 					movement.x = 0;
 					movement.y = 0;
-					shift.x = (double)vp.width / 2.0;
-					shift.y = (double)vp.height / 2.0;
+					shift.x = (float)vp.width / 2.0;
+					shift.y = (float)vp.height / 2.0;
 				}
 			}
 		}
 
-		if (ispause){
-			continue;
-		}
-
 		if (fix_i != amount){
-			shift.x = (double)vp.width / 2.0 - scale * bodies[fix_i].x + movement.x;
-			shift.y = (double)vp.height / 2.0 - scale * bodies[fix_i].y + movement.y;
+			shift.x = (float)vp.width / 2.0 - scale * bodies[fix_i].x + movement.x;
+			shift.y = (float)vp.height / 2.0 - scale * bodies[fix_i].y + movement.y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
@@ -153,6 +153,13 @@ int main(int argc, char const *argv[]){
 		SDL_GetRendererOutputSize(vp.ren, &vp.width, &vp.height);
 		render_bodies(&vp, bodies, bodies_ren, shift, scale, min_radius, amount);
 		SDL_RenderPresent(vp.ren);
+
+		if (ispause){
+			continue;
+		}
+
+		clrscr();
+		log_bodies(bodies, amount);
 
 		update_coords(bodies, amount, 1);
 
