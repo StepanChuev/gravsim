@@ -16,15 +16,14 @@ typedef struct Body_Ren {
 } Body_Ren;
 
 void render_body(View_Port *vp, Body *body, Body_Ren *body_ren, 
-	Vec2 shift, float scale, float min_r
+	Vec2 shift, float scale
 );
 void render_bodies(View_Port *vp, Body *bodies, Body_Ren *bodies_ren, 
-	Vec2 shift, float scale, float min_r, size_t len
+	Vec2 shift, float scale, size_t len
 );
 void log_bodies(Body *bodies, size_t len);
-void clear_console();
 size_t get_index_chosen_body(Body *bodies, Body_Ren *bodies_ren, 
-	Vec2 click, float scale, float min_r, size_t len
+	Vec2 click, float scale, size_t len
 );
 
 #endif

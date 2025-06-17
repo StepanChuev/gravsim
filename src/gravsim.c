@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
 #include <SDL2/SDL.h>
 #include "vp.h"
 #include "body.h"
@@ -9,13 +10,13 @@
 
 int main(int argc, char const *argv[]){
 	char ispause = 0;
-	float scale = 1;
-	float scale_step = 2;
-	float min_radius = 2;
+	float scale = 1.0;
+	float max_scale = 1024;
+	float scale_step = 2.0;
+	float movement_step = 10.0;
 	size_t amount = 3;
 	size_t fix_i = amount; // amount - no fixation
 	size_t new_fix_i = fix_i;
-	float movement_step = 10;
 	Vec2 click;
 	Vec2 shift;
 	Vec2 movement;
@@ -108,6 +109,7 @@ int main(int argc, char const *argv[]){
 
 				case SDLK_UP:
 					scale *= scale_step;
+					scale = (scale < max_scale) ? scale : max_scale;
 					break;
 
 				case SDLK_DOWN:
@@ -123,7 +125,7 @@ int main(int argc, char const *argv[]){
 					click.y = (float)event.button.y - shift.y;
 
 					new_fix_i = get_index_chosen_body(bodies, bodies_ren, 
-						click, scale, min_radius, amount
+						click, scale, amount
 					);
 
 					if (new_fix_i != amount){
@@ -151,7 +153,7 @@ int main(int argc, char const *argv[]){
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(vp.ren);
 		SDL_GetRendererOutputSize(vp.ren, &vp.width, &vp.height);
-		render_bodies(&vp, bodies, bodies_ren, shift, scale, min_radius, amount);
+		render_bodies(&vp, bodies, bodies_ren, shift, scale, amount);
 		SDL_RenderPresent(vp.ren);
 
 		if (ispause){
