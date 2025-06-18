@@ -1,66 +1,34 @@
 #include <math.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include "body.h"
 
-Vec2 *calc_force(Body *body1, Body *body2, float G){
-	float diffx_sqr = powf(body2->x - body1->x, 2.0);
-	float diffy_sqr = powf(body2->y - body1->y, 2.0);
-	float r_sqr = diffx_sqr + diffy_sqr;
-	float F = G * body1->m * body2->m / r_sqr;
-
-	Vec2 *F_vec = (Vec2 *)malloc(sizeof(Vec2));
-
-	if (F_vec == NULL){
-		return NULL;
-	}
-
-	F_vec->x = F * sqrtf(diffx_sqr / r_sqr);
-	F_vec->y = F * sqrtf(diffy_sqr / r_sqr);
-
-	return F_vec;
-}
-
-// calc accel for body1
-Vec2 *calc_accel(Body *body1, Body *body2, float G){
-	Vec2 *res = calc_force(body1, body2, G);
-
-	if (res == NULL){
-		return NULL;
-	}
-
-	if (body1->x > body2->x){
-		res->x *= -1.0;
-	}
-
-	if (body1->y > body2->y){
-		res->y *= -1.0;
-	}
-
-	res->x /= body1->m;
-	res->y /= body1->m;
-
-	return res;
-}
-
 void update_vel(Body *bodies, size_t len, float G){
-	Vec2 *a = NULL;
+	float diffx_sqr, diffy_sqr;
+	float r_sqr, F;
+	Vec2 F_vec;
 
 	for (size_t i = 0; i < len; i++){
-		for (size_t j = 0; j < len; j++){
-			if (i == j){
-				continue;
+		for (size_t j = i + 1; j < len; j++){
+			diffx_sqr = powf(bodies[j].x - bodies[i].x, 2.0);
+			diffy_sqr = powf(bodies[j].y - bodies[i].y, 2.0);
+			r_sqr = diffx_sqr + diffy_sqr;
+			F = G * bodies[i].m * bodies[j].m / r_sqr;
+
+			F_vec.x = F * sqrtf(diffx_sqr / r_sqr);
+			F_vec.y = F * sqrtf(diffy_sqr / r_sqr);
+
+			if (bodies[i].x > bodies[j].x){
+				F_vec.x *= -1.0;
 			}
 
-			a = calc_accel(bodies + i, bodies + j, G);
-
-			if (a == NULL){
-				continue;
+			if (bodies[i].y > bodies[j].y){
+				F_vec.y *= -1.0;
 			}
 
-			bodies[i].vx += a->x;
-			bodies[i].vy += a->y;
-
-			free(a);
+			bodies[i].vx += F_vec.x / bodies[i].m;
+			bodies[i].vy += F_vec.y / bodies[i].m;
+			bodies[j].vx -= F_vec.x / bodies[j].m;
+			bodies[j].vy -= F_vec.y / bodies[j].m;
 		}
 	}
 }

@@ -45,7 +45,8 @@ size_t get_index_chosen_body(Body *bodies, Body_Ren *bodies_ren,
 	size_t i = 0;
 
 	while (i < len){
-		if (powf(bodies[i].x * scale - click.x, 2) + powf(bodies[i].y * scale - click.y, 2) <= 
+		if (powf(bodies[i].x * scale - click.x, 2) + 
+			powf(bodies[i].y * scale - click.y, 2) <= 
 			powf(bodies_ren[i].radius * scale, 2)){
 			return i;
 		}

@@ -11,8 +11,6 @@ typedef struct Body {
 	float m;
 } Body;
 
-Vec2 *calc_force(Body *body1, Body *body2, float G);
-Vec2 *calc_accel(Body *body1, Body *body2, float G); // calc accel for body1
 void update_vel(Body *bodies, size_t len, float G);
 void update_coords(Body *bodies, size_t len, float G);
 
