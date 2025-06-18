@@ -47,8 +47,8 @@ void render_filled_circle(View_Port *vp, float x0, float y0, float r){
 	float x1, x2;
 
 	while (y1 >= y0 - r){
-		x1 = x0 - floor(sqrt(r*r - (y1 - y0)*(y1 - y0)));
-		x2 = x0 + floor(sqrt(r*r - (y1 - y0)*(y1 - y0)));
+		x1 = x0 - floorf(sqrtf(r*r - (y1 - y0)*(y1 - y0)));
+		x2 = x0 + floorf(sqrtf(r*r - (y1 - y0)*(y1 - y0)));
 
 		SDL_RenderDrawLine(vp->ren, x1, y1, x2, y1);
 		SDL_RenderDrawLine(vp->ren, x1, y2, x2, y2);

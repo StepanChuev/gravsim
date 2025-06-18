@@ -5,12 +5,21 @@
 void render_body(View_Port *vp, Body *body, Body_Ren *body_ren, 
 	Vec2 shift, float scale)
 {
+	float x = body->x * scale + shift.x;
+	float y = body->y * scale + shift.y;
+	float r = body_ren->radius * scale;
+
+	if (
+		x + r < 0.0 || y + r < 0.0 || 
+		x - r > (float)vp->width || y - r > (float)vp->height
+	){
+		return;
+	}
+
 	SDL_SetRenderDrawColor(vp->ren, body_ren->r, 
 		body_ren->g, body_ren->b, 0xFF
 	);
-	render_filled_circle(vp, body->x * scale + shift.x, 
-		body->y * scale + shift.y, body_ren->radius * scale
-	);
+	render_filled_circle(vp, x, y, r);
 }
 
 void render_bodies(View_Port *vp, Body *bodies, Body_Ren *bodies_ren, 

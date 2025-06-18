@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <limits.h>
 #include <SDL2/SDL.h>
 #include "vp.h"
 #include "body.h"
@@ -11,8 +10,8 @@
 int main(int argc, char const *argv[]){
 	char ispause = 0;
 	float scale = 1.0;
-	float max_scale = 1024;
 	float scale_step = 2.0;
+	float max_scale = 1024.0;
 	float movement_step = 10.0;
 	size_t amount = 3;
 	size_t fix_i = amount; // amount - no fixation
