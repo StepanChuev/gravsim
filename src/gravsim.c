@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
 #include <SDL2/SDL.h>
 #include "vp.h"
+#include "io.h"
 #include "body.h"
 #include "bodyren.h"
 #define FPS 60
 
-int main(int argc, char const *argv[]){
-	char ispause = 0;
+int main(int argc, char *argv[]){
+	Flags default_flags = {0, 1, -1, -1, 2.0, 10.0, SIZE_MAX};
+	Flags *flags = get_flags_from_args(argc, argv, &default_flags);
 	float scale = 1.0;
-	float scale_step = 2.0;
 	float max_scale = 1024.0;
-	float movement_step = 10.0;
 	size_t amount = 3;
-	size_t fix_i = amount; // amount - no fixation
-	size_t new_fix_i = fix_i;
+	size_t new_fix_i = flags->fix_i;
 	Vec2 click;
 	Vec2 shift;
 	Vec2 movement;
@@ -23,10 +23,12 @@ int main(int argc, char const *argv[]){
 	Body *bodies = (Body *)malloc(amount * sizeof(Body));
 	Body_Ren *bodies_ren = (Body_Ren *)malloc(amount * sizeof(Body_Ren));
 
-	if (!bodies || !bodies_ren || !vp_init(&vp, -1, -1, "gravsim")){
+	if (!bodies || !bodies_ren || !vp_init(&vp, flags->width, flags->height, "gravsim")){
 		exit(EXIT_FAILURE);
 	}
 
+	flags->width = vp.width;
+	flags->height = vp.height;
 	shift.x = (float)vp.width / 2.0;
 	shift.y = (float)vp.height / 2.0;
 
@@ -83,36 +85,36 @@ int main(int argc, char const *argv[]){
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym){
 				case 32:
-					ispause ^= 1;
+					flags->ispause ^= 1;
 					break;
 
 				case 'w':
-					shift.y += movement_step;
-					movement.y += movement_step;
+					shift.y += flags->move_step;
+					movement.y += flags->move_step;
 					break;
 
 				case 'a':
-					shift.x += movement_step;
-					movement.x += movement_step;
+					shift.x += flags->move_step;
+					movement.x += flags->move_step;
 					break;
 
 				case 's':
-					shift.y -= movement_step;
-					movement.y -= movement_step;
+					shift.y -= flags->move_step;
+					movement.y -= flags->move_step;
 					break;
 
 				case 'd':
-					shift.x -= movement_step;
-					movement.x -= movement_step;
+					shift.x -= flags->move_step;
+					movement.x -= flags->move_step;
 					break;
 
 				case SDLK_UP:
-					scale *= scale_step;
+					scale *= flags->scale_step;
 					scale = (scale < max_scale) ? scale : max_scale;
 					break;
 
 				case SDLK_DOWN:
-					scale /= scale_step;
+					scale /= flags->scale_step;
 					break;
 				}
 
@@ -128,14 +130,14 @@ int main(int argc, char const *argv[]){
 					);
 
 					if (new_fix_i != amount){
-						fix_i = new_fix_i;
+						flags->fix_i = new_fix_i;
 						movement.x = 0;
 						movement.y = 0;
 					}
 				}
 
 				else if (event.button.button == 3){
-					fix_i = amount;
+					flags->fix_i = amount;
 					movement.x = 0;
 					movement.y = 0;
 					shift.x = (float)vp.width / 2.0;
@@ -144,9 +146,9 @@ int main(int argc, char const *argv[]){
 			}
 		}
 
-		if (fix_i != amount){
-			shift.x = (float)vp.width / 2.0 - scale * bodies[fix_i].x + movement.x;
-			shift.y = (float)vp.height / 2.0 - scale * bodies[fix_i].y + movement.y;
+		if (flags->fix_i < amount){
+			shift.x = (float)vp.width / 2.0 - scale * bodies[flags->fix_i].x + movement.x;
+			shift.y = (float)vp.height / 2.0 - scale * bodies[flags->fix_i].y + movement.y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
@@ -155,7 +157,7 @@ int main(int argc, char const *argv[]){
 		render_bodies(&vp, bodies, bodies_ren, shift, scale, amount);
 		SDL_RenderPresent(vp.ren);
 
-		if (ispause){
+		if (flags->ispause){
 			continue;
 		}
 
@@ -175,6 +177,7 @@ cleanup:
 	free(bodies_ren);
 	free(bodies);
 	vp_cleanup(&vp);
+	free(flags);
 
 	return 0;
 }

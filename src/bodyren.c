@@ -30,15 +30,6 @@ void render_bodies(View_Port *vp, Body *bodies, Body_Ren *bodies_ren,
 	}
 }
 
-void log_bodies(Body *bodies, size_t len){
-	for (size_t i = 0; i < len; i++){
-		printf("BODY %lu\n", i);
-		printf("\tx: %f\ty: %f\n\tvx: %f\tvy: %f\n\tm: %f\n", 
-			bodies[i].x, bodies[i].y, bodies[i].vx, bodies[i].vy, bodies[i].m
-		);
-	}
-}
-
 size_t get_index_chosen_body(Body *bodies, Body_Ren *bodies_ren, 
 	Vec2 click, float scale, size_t len)
 {
