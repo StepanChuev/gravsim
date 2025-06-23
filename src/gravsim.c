@@ -7,63 +7,40 @@
 #include "io.h"
 #include "body.h"
 #include "bodyren.h"
+#include "system.h"
 #define FPS 60
 
 int main(int argc, char *argv[]){
-	Flags default_flags = {0, 1, -1, -1, 2.0, 10.0, SIZE_MAX};
+	Flags default_flags = {0, 1, -1, -1, 2.0, 10.0, SIZE_MAX, NULL};
 	Flags *flags = get_flags_from_args(argc, argv, &default_flags);
 	float scale = 1.0;
 	float max_scale = 1024.0;
-	size_t amount = 3;
 	size_t new_fix_i = flags->fix_i;
 	Vec2 click;
-	Vec2 shift;
-	Vec2 movement;
+	Vec2 shift = {0, 0};
+	Vec2 movement = {0, 0};
 	View_Port vp;
-	Body *bodies = (Body *)malloc(amount * sizeof(Body));
-	Body_Ren *bodies_ren = (Body_Ren *)malloc(amount * sizeof(Body_Ren));
+	System *sys = NULL;
 
-	if (!bodies || !bodies_ren || !vp_init(&vp, flags->width, flags->height, "gravsim")){
-		exit(EXIT_FAILURE);
-	}
+	if (!flags)
+		goto cleanup;
+
+	if (!flags->sys_filepath || !vp_init(&vp, flags->width, flags->height, "gravsim"))
+		goto cleanup;
+	
 
 	flags->width = vp.width;
 	flags->height = vp.height;
 	shift.x = (float)vp.width / 2.0;
 	shift.y = (float)vp.height / 2.0;
 
-	bodies[0].x  = 0.0;
-	bodies[0].y  = 0.0;
-	bodies[0].vx = 0.0;
-	bodies[0].vy = 0.0;
-	bodies[0].m  = 20.0;
+	sys = parse_system_from_file(flags->sys_filepath);
 
-	bodies[1].x  = 0.0;
-	bodies[1].y  = -100.0;
-	bodies[1].vx = -0.2;
-	bodies[1].vy = 0.0;
-	bodies[1].m  = 1.0;
+	if (!sys)
+		goto cleanup;
 
-	bodies[2].x  = 0.0;
-	bodies[2].y  = 100.0;
-	bodies[2].vx = 0.3;
-	bodies[2].vy = 0.0;
-	bodies[2].m  = 1.0;
-
-	bodies_ren[0].r = 0xFF;
-	bodies_ren[0].g = 0xFF;
-	bodies_ren[0].b = 0x00;
-	bodies_ren[0].radius = 7;
-
-	bodies_ren[1].r = 0xFF;
-	bodies_ren[1].g = 0x00;
-	bodies_ren[1].b = 0x00;
-	bodies_ren[1].radius = 5;
-
-	bodies_ren[2].r = 0x00;
-	bodies_ren[2].g = 0x00;
-	bodies_ren[2].b = 0xFF;
-	bodies_ren[2].radius = 5;
+	if (!sys->bodies || !sys->bodies_ren)
+		goto cleanup;
 
 	Uint32 start, elapsed, estimated = 1000 / FPS;
 	SDL_Event event;
@@ -125,11 +102,11 @@ int main(int argc, char *argv[]){
 					click.x = (float)event.button.x - shift.x;
 					click.y = (float)event.button.y - shift.y;
 
-					new_fix_i = get_index_chosen_body(bodies, bodies_ren, 
-						click, scale, amount
+					new_fix_i = get_index_chosen_body(sys->bodies, sys->bodies_ren, 
+						click, scale, sys->len
 					);
 
-					if (new_fix_i != amount){
+					if (new_fix_i != sys->len){
 						flags->fix_i = new_fix_i;
 						movement.x = 0;
 						movement.y = 0;
@@ -137,7 +114,7 @@ int main(int argc, char *argv[]){
 				}
 
 				else if (event.button.button == 3){
-					flags->fix_i = amount;
+					flags->fix_i = sys->len;
 					movement.x = 0;
 					movement.y = 0;
 					shift.x = (float)vp.width / 2.0;
@@ -146,25 +123,25 @@ int main(int argc, char *argv[]){
 			}
 		}
 
-		if (flags->fix_i < amount){
-			shift.x = (float)vp.width / 2.0 - scale * bodies[flags->fix_i].x + movement.x;
-			shift.y = (float)vp.height / 2.0 - scale * bodies[flags->fix_i].y + movement.y;
+		if (flags->fix_i < sys->len){
+			shift.x = (float)vp.width / 2.0 - scale * sys->bodies[flags->fix_i].x + movement.x;
+			shift.y = (float)vp.height / 2.0 - scale * sys->bodies[flags->fix_i].y + movement.y;
 		}
 
 		SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(vp.ren);
 		SDL_GetRendererOutputSize(vp.ren, &vp.width, &vp.height);
-		render_bodies(&vp, bodies, bodies_ren, shift, scale, amount);
+		render_bodies(&vp, sys->bodies, sys->bodies_ren, shift, scale, sys->len);
 		SDL_RenderPresent(vp.ren);
 
 		if (flags->ispause){
 			continue;
 		}
 
-		clrscr();
-		log_bodies(bodies, amount);
+		// clrscr();
+		// log_bodies(sys->bodies, sys->len);
 
-		update_coords(bodies, amount, 1);
+		update_coords(sys->bodies, sys->len, sys->G);
 
 		elapsed = SDL_GetTicks() - start;
 
@@ -174,9 +151,14 @@ int main(int argc, char *argv[]){
 	}
 
 cleanup:
-	free(bodies_ren);
-	free(bodies);
+	if (sys){
+		free(sys->bodies_ren);
+		free(sys->bodies);
+		free(sys);
+	}
+	
 	vp_cleanup(&vp);
+	free(flags->sys_filepath);
 	free(flags);
 
 	return 0;

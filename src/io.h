@@ -17,6 +17,7 @@ typedef struct Flags {
 	float scale_step;
 	float move_step;
 	size_t fix_i;
+	char *sys_filepath;
 } Flags;
 
 Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags);

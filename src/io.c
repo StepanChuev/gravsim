@@ -38,6 +38,14 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 
 		if (!strcmp(argv[i], "-fixi"))
 			flags->fix_i = strtoull(argv[i + 1], NULL, 0);
+
+		if (!strcmp(argv[i], "-sys")){
+			flags->sys_filepath = (char *)malloc(strlen(argv[i + 1]) + 1);
+
+			if (flags->sys_filepath){
+				strcpy(flags->sys_filepath, argv[i + 1]);
+			}
+		}
 	}
 
 	return flags;

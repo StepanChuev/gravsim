@@ -1,5 +1,6 @@
 #ifndef VP_H
 #define VP_H
+#include <SDL2/SDL.h>
 
 typedef struct View_Port {
 	int width, height;
