@@ -34,28 +34,18 @@ System *parse_system_from_file(const char *filepath){
 		if (ch == '\n')
 			iscomment = 0;
 
-		if (iscomment)
-			continue;
-
-		if (ch == ':'){
-			key[sym_i] = '\0';
-			sym_i = 0;
-			iskey = 0;
-			continue;
-		}
-
-		if (ch == '\n' && sym_i != 0){
+		if ((ch == '\n' || ch == EOF) && sym_i != 0){
 			value[sym_i] = '\0';
 			iskey = 1;
 
 			if (!strcmp(key, "@iter"))
-				sys->iter = (uint32_t)strtoul(value, NULL, 0);
+				sys->iter = strtoul(value, NULL, 0);
 			
 			else if (!strcmp(key, "@G"))
 				sys->G = strtof(value, NULL);
 
 			else if (!strcmp(key, "@len") && sys->len == 0){
-				sys->len = (size_t)strtoull(value, NULL, 0);
+				sys->len = strtoull(value, NULL, 0);
 				sys->bodies = (Body *)malloc(sys->len * sizeof(Body));
 				sys->bodies_ren = (Body_Ren *)malloc(sys->len * sizeof(Body_Ren));
 
@@ -106,7 +96,14 @@ System *parse_system_from_file(const char *filepath){
 			sym_i = 0;
 		}
 
-		if (ch == ' ' || ch == '\t' || ch == '\n')
+		if (ch == ':'){
+			key[sym_i] = '\0';
+			sym_i = 0;
+			iskey = 0;
+			continue;
+		}
+
+		if (ch == ' ' || ch == '\t' || ch == '\n' || iscomment)
 			continue;
 
 		if (ch == '%' && body_i + 1 < sys->len){

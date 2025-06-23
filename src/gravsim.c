@@ -138,8 +138,8 @@ int main(int argc, char *argv[]){
 			continue;
 		}
 
-		// clrscr();
-		// log_bodies(sys->bodies, sys->len);
+		clrscr();
+		log_bodies(sys->bodies, sys->len);
 
 		update_coords(sys->bodies, sys->len, sys->G);
 
