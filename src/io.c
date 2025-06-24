@@ -39,6 +39,22 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 		if (!strcmp(argv[i], "-fixi"))
 			flags->fix_i = strtoull(argv[i + 1], NULL, 0);
 
+		if (!strcmp(argv[i], "-sdir")){
+			flags->save_dir = (char *)malloc(strlen(argv[i + 1]) + 1);
+
+			if (flags->save_dir){
+				strcpy(flags->save_dir, argv[i + 1]);
+			}
+		}
+
+		if (!strcmp(argv[i], "-spref")){
+			flags->save_pref = (char *)malloc(strlen(argv[i + 1]) + 1);
+
+			if (flags->save_pref){
+				strcpy(flags->save_pref, argv[i + 1]);
+			}
+		}
+
 		if (!strcmp(argv[i], "-sys")){
 			flags->sys_filepath = (char *)malloc(strlen(argv[i + 1]) + 1);
 

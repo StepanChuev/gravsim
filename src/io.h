@@ -18,6 +18,8 @@ typedef struct Flags {
 	float move_step;
 	size_t fix_i;
 	char *sys_filepath;
+	char *save_dir;
+	char *save_pref;
 } Flags;
 
 Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags);

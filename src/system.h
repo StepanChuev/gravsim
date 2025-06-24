@@ -13,7 +13,8 @@ typedef struct System {
 	Body_Ren *bodies_ren;
 } System;
 
-System *parse_system_from_file(const char *filepath);
+System *read_system_from_file(const char *filepath);
+int write_system_to_file(System *sys, const char *filepath);
 int convert_hex_char_to_int(char ch);
 
 #endif

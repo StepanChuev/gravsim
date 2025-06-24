@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <math.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
@@ -8,10 +9,11 @@
 #include "body.h"
 #include "bodyren.h"
 #include "system.h"
+#define SAVE_FILEPATH_SIZE 128
 #define FPS 60
 
 int main(int argc, char *argv[]){
-	Flags default_flags = {0, 1, -1, -1, 2.0, 10.0, SIZE_MAX, NULL};
+	Flags default_flags = {0, 1, -1, -1, 2.0, 10.0, SIZE_MAX, NULL, ".", "sys"};
 	Flags *flags = get_flags_from_args(argc, argv, &default_flags);
 	float scale = 1.0;
 	float max_scale = 1024.0;
@@ -20,6 +22,7 @@ int main(int argc, char *argv[]){
 	Vec2 shift = {0, 0};
 	Vec2 movement = {0, 0};
 	View_Port vp;
+	char save_filepath[SAVE_FILEPATH_SIZE];
 	System *sys = NULL;
 
 	if (!flags)
@@ -34,7 +37,7 @@ int main(int argc, char *argv[]){
 	shift.x = (float)vp.width / 2.0;
 	shift.y = (float)vp.height / 2.0;
 
-	sys = parse_system_from_file(flags->sys_filepath);
+	sys = read_system_from_file(flags->sys_filepath);
 
 	if (!sys)
 		goto cleanup;
@@ -45,7 +48,7 @@ int main(int argc, char *argv[]){
 	Uint32 start, elapsed, estimated = 1000 / FPS;
 	SDL_Event event;
 
-	for (;;){
+	for (;; sys->iter++){
 		start = SDL_GetTicks();
 
 		while (SDL_PollEvent(&event)){
@@ -83,6 +86,14 @@ int main(int argc, char *argv[]){
 				case 'd':
 					shift.x -= flags->move_step;
 					movement.x -= flags->move_step;
+					break;
+
+				case 'l':
+					snprintf(
+						save_filepath, SAVE_FILEPATH_SIZE, "%s/%s_%u.conf",
+						flags->save_dir, flags->save_pref, sys->iter
+					);
+					write_system_to_file(sys, save_filepath);
 					break;
 
 				case SDLK_UP:
@@ -139,6 +150,7 @@ int main(int argc, char *argv[]){
 		}
 
 		clrscr();
+		printf("Iter: %u\n", sys->iter);
 		log_bodies(sys->bodies, sys->len);
 
 		update_coords(sys->bodies, sys->len, sys->G);

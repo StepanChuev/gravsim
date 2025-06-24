@@ -5,14 +5,14 @@
 #define KEY_LEN 7
 #define VAL_LEN 64
 
-System *parse_system_from_file(const char *filepath){
+System *read_system_from_file(const char *filepath){
 	char iskey = 1, iscomment = 0;
 	char key[KEY_LEN], value[VAL_LEN];
 	size_t sym_i = 0, body_i = 0;
 	System *sys = (System *)malloc(sizeof(System));
 	FILE *file = fopen(filepath, "r");
 
-	if (file == NULL || sys == NULL){
+	if (!file || !sys){
 		free(sys);
 		fclose(file);
 
@@ -122,6 +122,33 @@ System *parse_system_from_file(const char *filepath){
 	fclose(file);
 
 	return sys;
+}
+
+int write_system_to_file(System *sys, const char *filepath){
+	FILE *file = fopen(filepath, "w");
+
+	if (!file || !sys){
+		fclose(file);
+
+		return 0;
+	}
+
+	fprintf(file, "@iter: %u\n@len: %lu\n@G: %.9f\n\n", sys->iter, sys->len, sys->G);
+
+	for (size_t i = 0; i < sys->len; i++){
+		if (i != 0)
+			fprintf(file, "%%\n");
+
+		fprintf(
+			file, 
+			"x: %.9f\ny: %.9f\nvx: %.9f\nvy: %.9f\nm: %.9f\nr: %.9f\nrgb: %02X%02X%02X\n",
+			sys->bodies[i].x, sys->bodies[i].y, sys->bodies[i].vx, sys->bodies[i].vy,
+			sys->bodies[i].m, sys->bodies_ren[i].radius, sys->bodies_ren[i].r,
+			sys->bodies_ren[i].g, sys->bodies_ren[i].b
+		);
+	}
+
+	return 1;
 }
 
 int convert_hex_char_to_int(char ch){
