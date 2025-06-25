@@ -21,6 +21,18 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 		if (!strcmp(argv[i], "-fnodraw"))
 			flags->isdraw = 0;
 
+		if (!strcmp(argv[i], "-fnosaveren"))
+			flags->issave_ren_info = 0;
+
+		if (!strcmp(argv[i], "-fnolog"))
+			flags->islog = 0;
+
+		if (!strcmp(argv[i], "-fnologi"))
+			flags->islogi = 0;
+
+		if (!strcmp(argv[i], "-fnologb"))
+			flags->islogb = 0;
+
 		if (i + 1 >= argc)
 			continue;
 
@@ -29,6 +41,9 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 
 		if (!strcmp(argv[i], "-h"))
 			flags->height = atoi(argv[i + 1]);
+
+		if (!strcmp(argv[i], "-fps"))
+			flags->fps = atoi(argv[i + 1]);
 
 		if (!strcmp(argv[i], "-ss"))
 			flags->scale_step = strtof(argv[i + 1], NULL);
@@ -39,29 +54,20 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 		if (!strcmp(argv[i], "-fixi"))
 			flags->fix_i = strtoull(argv[i + 1], NULL, 0);
 
-		if (!strcmp(argv[i], "-sdir")){
-			flags->save_dir = (char *)malloc(strlen(argv[i + 1]) + 1);
+		if (!strcmp(argv[i], "-siter"))
+			flags->save_mult_iter = strtoull(argv[i + 1], NULL, 0);
 
-			if (flags->save_dir){
-				strcpy(flags->save_dir, argv[i + 1]);
-			}
-		}
+		if (!strcmp(argv[i], "-eiter"))
+			flags->exit_iter = strtoull(argv[i + 1], NULL, 0);
 
-		if (!strcmp(argv[i], "-spref")){
-			flags->save_pref = (char *)malloc(strlen(argv[i + 1]) + 1);
+		if (!strcmp(argv[i], "-sys"))
+			flags->sys_filepath = argv[i + 1];
 
-			if (flags->save_pref){
-				strcpy(flags->save_pref, argv[i + 1]);
-			}
-		}
+		if (!strcmp(argv[i], "-sdir"))
+			flags->save_dir = argv[i + 1];
 
-		if (!strcmp(argv[i], "-sys")){
-			flags->sys_filepath = (char *)malloc(strlen(argv[i + 1]) + 1);
-
-			if (flags->sys_filepath){
-				strcpy(flags->sys_filepath, argv[i + 1]);
-			}
-		}
+		if (!strcmp(argv[i], "-spref"))
+			flags->save_pref = argv[i + 1];
 	}
 
 	return flags;
