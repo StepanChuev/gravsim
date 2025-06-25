@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
 #include "vp.h"
@@ -19,6 +17,7 @@ int main(int argc, char *argv[]){
 	Flags *flags = get_flags_from_args(argc, argv, &default_flags);
 	float scale = 1.0;
 	float max_scale = 1024.0;
+	Uint32 start = 0, elapsed = 0, estimated = 0;
 	size_t new_fix_i = flags->fix_i;
 	Vec2 click;
 	Vec2 shift = {0, 0};
@@ -26,7 +25,6 @@ int main(int argc, char *argv[]){
 	View_Port vp;
 	char save_filepath[SAVE_FILEPATH_SIZE];
 	System *sys = NULL;
-	Uint32 start, elapsed, estimated = 1000 / flags->fps;
 	SDL_Event event;
 
 	if (!flags)
@@ -42,7 +40,8 @@ int main(int argc, char *argv[]){
 	
 	shift.x = (float)vp.width / 2.0;
 	shift.y = (float)vp.height / 2.0;
-	sys = read_system_from_file(flags->sys_filepath, flags->issave_ren_info);
+	estimated = 1000 / flags->fps;
+	sys = read_system_from_file(flags->sys_filepath, flags->isuse_ren_info);
 
 	if (!sys)
 		goto cleanup;
@@ -51,7 +50,8 @@ int main(int argc, char *argv[]){
 		goto cleanup;
 
 	for (;; sys->iter++){
-		if (flags->save_mult_iter != 0 && sys->iter != 0 && sys->iter % flags->save_mult_iter == 0){
+		if (flags->save_mult_iter != 0 && sys->iter != 0 && 
+			sys->iter % flags->save_mult_iter == 0){
 			snprintf(
 				save_filepath, SAVE_FILEPATH_SIZE, "%s/%s_%u.conf",
 				flags->save_dir, flags->save_pref, sys->iter
@@ -149,8 +149,10 @@ int main(int argc, char *argv[]){
 			}
 
 			if (flags->fix_i < sys->len){
-				shift.x = (float)vp.width / 2.0 - scale * sys->bodies[flags->fix_i].x + movement.x;
-				shift.y = (float)vp.height / 2.0 - scale * sys->bodies[flags->fix_i].y + movement.y;
+				shift.x = (float)vp.width / 2.0 - 
+					scale * sys->bodies[flags->fix_i].x + movement.x;
+				shift.y = (float)vp.height / 2.0 - 
+					scale * sys->bodies[flags->fix_i].y + movement.y;
 			}
 
 			SDL_SetRenderDrawColor(vp.ren, 0x00, 0x00, 0x00, 0xFF);
@@ -192,10 +194,10 @@ cleanup:
 		free(sys);
 	}
 	
-	if (flags->isdraw)
+	if (flags && flags->isdraw){
 		vp_cleanup(&vp);
-
-	free(flags);
+		free(flags);
+	}
 
 	return 0;
 }

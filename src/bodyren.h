@@ -1,6 +1,5 @@
 #ifndef BODYREN_H
 #define BODYREN_H
-#include <stdio.h>
 #include "vp.h"
 #include "body.h"
 

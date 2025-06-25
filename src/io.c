@@ -6,13 +6,11 @@
 Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 	Flags *flags = (Flags *)malloc(sizeof(Flags));
 
-	if (default_flags){
-		memcpy(flags, default_flags, sizeof(Flags));
-	}
-
-	else {
+	if (!default_flags){
 		return NULL;
 	}
+
+	memcpy(flags, default_flags, sizeof(Flags));
 
 	for (int i = 0; i < argc; i++){
 		if (!strcmp(argv[i], "-fpause"))
@@ -21,8 +19,8 @@ Flags *get_flags_from_args(int argc, char **argv, Flags *default_flags){
 		if (!strcmp(argv[i], "-fnodraw"))
 			flags->isdraw = 0;
 
-		if (!strcmp(argv[i], "-fnosaveren"))
-			flags->issave_ren_info = 0;
+		if (!strcmp(argv[i], "-fnouseren"))
+			flags->isuse_ren_info = 0;
 
 		if (!strcmp(argv[i], "-fnolog"))
 			flags->islog = 0;

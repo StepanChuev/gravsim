@@ -12,7 +12,7 @@
 typedef struct Flags {
 	char ispause;
 	char isdraw;
-	char issave_ren_info;
+	char isuse_ren_info;
 	char islog;
 	char islogi;
 	char islogb;
